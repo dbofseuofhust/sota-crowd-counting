@@ -30,7 +30,7 @@ class Crowd(data.Dataset):
 
         self.root_path = root_path
         self.im_list = sorted(glob(os.path.join(self.root_path, '*.jpg')))
-        if method not in ['train', 'val']:
+        if method not in ['train', 'val', 'test']:
             raise Exception("not implement")
         self.method = method
 
@@ -65,6 +65,11 @@ class Crowd(data.Dataset):
             img = self.trans(img)
             name = os.path.basename(img_path).split('.')[0]
             return img, len(keypoints), name
+        elif self.method == 'test':
+            img = img.resize((self.c_size, self.c_size),Image.ANTIALIAS)
+            img = self.trans(img)
+            name = os.path.basename(img_path).split('.')[0]
+            return img, name
 
     def train_transform(self, img, keypoints):
         """random crop image patch and find people in it"""
@@ -96,3 +101,5 @@ class Crowd(data.Dataset):
                 img = F.hflip(img)
         return self.trans(img), torch.from_numpy(keypoints.copy()).float(), \
                torch.from_numpy(target.copy()).float(), st_size
+
+
