@@ -9,7 +9,7 @@ import crowd_counting_pytorch as ccp
 
 args = None
 
-def cal_mae(dataloader,model_param_path):
+def cal_mae(dataloader,model,model_param_path):
     '''
     Calculate the MAE of the test data.
     img_root: the root of test image data.
@@ -17,7 +17,10 @@ def cal_mae(dataloader,model_param_path):
     model_param_path: the path of specific mcnn parameters.
     '''
     device = torch.device("cuda")
-    model = ccp.vgg19()
+
+    # model = ccp.vgg19()
+    model = ccp.get_models(model)()
+
     model.load_state_dict(torch.load(model_param_path))
     model.to(device)
 
@@ -36,7 +39,7 @@ def cal_mae(dataloader,model_param_path):
     log_str = 'Final Test: mae {}, mse {}'.format(mae, mse)
     print(log_str)
 
-def estimate_density_map(dataloader,model_param_path,index=None,saveroot=None):
+def estimate_density_map(dataloader,model,model_param_path,index=None,saveroot=None):
     '''
     Show one estimated density-map.
     img_root: the root of test image data.
@@ -45,7 +48,10 @@ def estimate_density_map(dataloader,model_param_path,index=None,saveroot=None):
     index: the order of the test image in test dataset.
     '''
     device = torch.device("cuda")
-    model = ccp.vgg19()
+
+    # model = ccp.vgg19()
+    model = ccp.get_models(model)()
+
     model.load_state_dict(torch.load(model_param_path))
     model.to(device)
 
@@ -77,6 +83,8 @@ def parse_args():
                         help='training data directory')
     parser.add_argument('--save-dir', default='/home/teddy/vgg',
                         help='model directory')
+    parser.add_argument('--model', default='/home/teddy/vgg',
+                        help='model directory')
     args = parser.parse_args()
     return args
 
@@ -91,8 +99,8 @@ if __name__ == '__main__':
     model_param_path = os.path.join(args.save_dir, 'best_model.pth')
     saveroot = os.path.join(args.save_dir,'visual')
 
-    # cal_mae(dataloader,model_param_path)
-    estimate_density_map(dataloader,model_param_path,1,saveroot)
+    # cal_mae(dataloader,args.model,model_param_path)
+    estimate_density_map(dataloader,args.model,model_param_path,1,saveroot)
 
     # model = ccp.vgg19()
     # device = torch.device('cuda')

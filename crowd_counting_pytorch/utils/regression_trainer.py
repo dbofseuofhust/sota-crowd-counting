@@ -13,6 +13,7 @@ from ..models.vgg import vgg19
 from ..datasets.crowd import Crowd
 from ..losses.bay_loss import Bay_Loss
 from ..losses.post_prob import Post_Prob
+from ..models import get_models
 
 
 def train_collate(batch):
@@ -51,7 +52,11 @@ class RegTrainer(Trainer):
                                           num_workers=args.num_workers*self.device_count,
                                           pin_memory=(True if x == 'train' else False))
                             for x in ['train', 'val']}
-        self.model =vgg19()
+
+        # self.model = vgg19()
+
+        self.model = get_models(self.args.model)()
+
         self.model.to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
