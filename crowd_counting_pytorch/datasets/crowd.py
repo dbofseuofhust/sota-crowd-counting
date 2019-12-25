@@ -7,6 +7,8 @@ import torchvision.transforms.functional as F
 from torchvision import transforms
 import random
 import numpy as np
+import warnings
+warnings.filterwarnings('ignore')
 
 def random_crop(im_h, im_w, crop_h, crop_w):
     res_h = im_h - crop_h
@@ -29,7 +31,7 @@ class Crowd(data.Dataset):
                  method='train'):
 
         self.root_path = root_path
-        self.im_list = sorted(glob(os.path.join(self.root_path, '*.jpg')))
+        self.im_list = sorted(glob(os.path.join(self.root_path, '*.*')))
         if method not in ['train', 'val', 'test']:
             raise Exception("not implement")
         self.method = method
@@ -68,7 +70,7 @@ class Crowd(data.Dataset):
         elif self.method == 'test':
             img = img.resize((self.c_size, self.c_size),Image.ANTIALIAS)
             img = self.trans(img)
-            name = os.path.basename(img_path).split('.')[0]
+            name = os.path.basename(img_path)
             return img, name
 
     def train_transform(self, img, keypoints):

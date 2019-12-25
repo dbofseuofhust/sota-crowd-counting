@@ -92,8 +92,8 @@ def crowd_counting(dataloader,model_param_path,savecsv):
         inputs = inputs.to(device)
         et_dmap = model(inputs).detach()
         et_count = torch.sum(et_dmap).item()
-        output_dict["file"].append("{}.jpg".format(name[0]))
-        if et_count >=100:
+        output_dict["file"].append(name[0])
+        if et_count >= 100:
             et_count = 100
         output_dict["man_count"].append(int(et_count))
 
@@ -114,7 +114,7 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    datasets = ccp.Crowd(args.data_dir, 2048, 8, is_gray=False, method='test')
+    datasets = ccp.Crowd(args.data_dir, 512, 8, is_gray=False, method='test')
     dataloader = torch.utils.data.DataLoader(datasets, 1, shuffle=False,
                                              num_workers=8, pin_memory=False)
 
