@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 from torch.nn import functional as F
 from torchvision import models
+import collections
 
 # https://github.com/weizheliu/Context-Aware-Crowd-Counting
 
@@ -44,8 +45,11 @@ class OriCANNet(nn.Module):
         if not load_weights:
             mod = models.vgg16(pretrained=True)
             self._initialize_weights()
-            for i in range(len(self.frontend.state_dict().items())):
-                self.frontend.state_dict().items()[i][1].data[:] = mod.state_dict().items()[i][1].data[:]
+            fsd = collections.OrderedDict()
+            for i in range(len(self.frontend.state_dict().items())):  # 10个卷积*（weight，bias）=20个参数
+                temp_key = list(self.frontend.state_dict().items())[i][0]
+                fsd[temp_key] = list(mod.state_dict().items())[i][1]
+            self.frontend.load_state_dict(fsd)
 
     def forward(self,x):
         x = self.frontend(x)

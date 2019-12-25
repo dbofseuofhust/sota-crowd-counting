@@ -10,7 +10,7 @@ from torch.utils.data.dataloader import default_collate
 import logging
 import numpy as np
 from ..models.vgg import vgg19
-from ..datasets.crowd import Crowd
+from ..datasets.crowd import Crowd,CrowdJoint
 from ..losses.bay_loss import Bay_Loss
 from ..losses.post_prob import Post_Prob
 from ..models import get_models
@@ -39,19 +39,39 @@ class RegTrainer(Trainer):
             raise Exception("gpu is not available")
 
         self.downsample_ratio = args.downsample_ratio
-        self.datasets = {x: Crowd(os.path.join(args.data_dir, x),
-                                  args.crop_size,
-                                  args.downsample_ratio,
-                                  args.is_gray, x) for x in ['train', 'val']}
-        self.dataloaders = {x: DataLoader(self.datasets[x],
-                                          collate_fn=(train_collate
-                                                      if x == 'train' else default_collate),
-                                          batch_size=(args.batch_size
-                                          if x == 'train' else 1),
-                                          shuffle=(True if x == 'train' else False),
-                                          num_workers=args.num_workers*self.device_count,
-                                          pin_memory=(True if x == 'train' else False))
-                            for x in ['train', 'val']}
+        self.use_joint_dataset = args.use_joint_dataset
+
+        if self.use_joint_dataset:
+            args.joint_dir = args.joint_dir.split(',')
+            self.datasets = {x: CrowdJoint(os.path.join(args.joint_dir[0], x, 'images'), os.path.join(args.joint_dir[1], x, 'images'), os.path.join(args.joint_dir[2], x),
+                                      args.crop_size,
+                                      args.downsample_ratio,
+                                      args.is_gray, x) for x in ['train', 'val']}
+
+            self.dataloaders = {x: DataLoader(self.datasets[x],
+                                              collate_fn=(train_collate
+                                              if x == 'train' else default_collate),
+                                              batch_size=(args.batch_size
+                                              if x == 'train' else 1),
+                                              shuffle=(True if x == 'train' else False),
+                                              num_workers=args.num_workers * self.device_count,
+                                              pin_memory=(True if x == 'train' else False))
+                                for x in ['train', 'val']}
+        else:
+            self.datasets = {x: Crowd(os.path.join(args.data_dir, x),
+                                      args.crop_size,
+                                      args.downsample_ratio,
+                                      args.is_gray, x) for x in ['train', 'val']}
+
+            self.dataloaders = {x: DataLoader(self.datasets[x],
+                                              collate_fn=(train_collate
+                                              if x == 'train' else default_collate),
+                                              batch_size=(args.batch_size
+                                              if x == 'train' else 1),
+                                              shuffle=(True if x == 'train' else False),
+                                              num_workers=args.num_workers * self.device_count,
+                                              pin_memory=(True if x == 'train' else False))
+                                for x in ['train', 'val']}
 
         # self.model = vgg19()
 
