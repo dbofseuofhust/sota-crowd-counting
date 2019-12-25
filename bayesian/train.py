@@ -4,6 +4,8 @@ import os
 import torch
 args = None
 
+# https://github.com/ZhihengCV/Bayesian-Crowd-Counting
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Train ')
     parser.add_argument('--data-dir', default='/home/teddy/UCF-Train-Val-Test',
