@@ -24,7 +24,6 @@ def train_collate(batch):
     st_sizes = torch.FloatTensor(transposed_batch[3])
     return images, points, targets, st_sizes
 
-
 class RegTrainer(Trainer):
     def setup(self):
         """initial the datasets, model, loss and optimizer"""
@@ -97,7 +96,9 @@ class RegTrainer(Trainer):
                                    args.background_ratio,
                                    args.use_background,
                                    self.device)
+
         self.criterion = Bay_Loss(args.use_background, self.device)
+
         self.save_list = Save_Handle(max_num=args.max_model_num)
         self.best_mae = np.inf
         self.best_mse = np.inf
@@ -131,6 +132,7 @@ class RegTrainer(Trainer):
             with torch.set_grad_enabled(True):
                 outputs = self.model(inputs)
                 prob_list = self.post_prob(points, st_sizes)
+
                 loss = self.criterion(prob_list, targets, outputs)
 
                 self.optimizer.zero_grad()

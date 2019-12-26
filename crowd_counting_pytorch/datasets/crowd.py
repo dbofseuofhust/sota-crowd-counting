@@ -82,13 +82,14 @@ class Crowd(data.Dataset):
         wd, ht = img.size
         st_size = min(wd, ht)
 
-        if st_size <= self.c_size:
-            scale = int(self.c_size / st_size)+1
-            wd = int(wd*scale)
-            ht = int(ht*scale)
-            img = img.resize((wd,ht))
-            keypoints = np.resize(keypoints,(wd,ht))
+        # if st_size <= self.c_size:
+        #     scale = int(self.c_size / st_size)+1
+        #     wd = int(wd*scale)
+        #     ht = int(ht*scale)
+        #     img = img.resize((wd,ht))
+        #     keypoints = np.resize(keypoints,(wd,ht))
 
+        assert st_size >= self.c_size
         assert len(keypoints) > 0
         i, j, h, w = random_crop(ht, wd, self.c_size, self.c_size)
         img = F.crop(img, i, j, h, w)
@@ -112,8 +113,7 @@ class Crowd(data.Dataset):
         else:
             if random.random() > 0.5:
                 img = F.hflip(img)
-        return self.trans(img), torch.from_numpy(keypoints.copy()).float(), \
-               torch.from_numpy(target.copy()).float(), st_size
+        return self.trans(img), torch.from_numpy(keypoints.copy()).float(), torch.from_numpy(target.copy()).float(), st_size
 
 class CrowdSHT(data.Dataset):
     def __init__(self, root_path, crop_size,
@@ -204,8 +204,8 @@ class CrowdSHT(data.Dataset):
         else:
             if random.random() > 0.5:
                 img = F.hflip(img)
-        return self.trans(img), torch.from_numpy(keypoints.copy()).float(), \
-               torch.from_numpy(target.copy()).float(), st_size
+        return self.trans(img), torch.from_numpy(keypoints.copy()).float(), torch.from_numpy(target.copy()).float(), st_size
+
 
 # 联合数据集 shanghaitech+ucf
 class CrowdJoint(data.Dataset):
@@ -273,6 +273,7 @@ class CrowdJoint(data.Dataset):
         wd, ht = img.size
         st_size = min(wd, ht)
 
+        # [todo] check here
         if st_size <= self.c_size:
             scale = int(self.c_size / st_size)+1
             wd = int(wd*scale)
@@ -304,7 +305,7 @@ class CrowdJoint(data.Dataset):
         else:
             if random.random() > 0.5:
                 img = F.hflip(img)
-        return self.trans(img), torch.from_numpy(keypoints.copy()).float(), \
-               torch.from_numpy(target.copy()).float(), st_size
+        return self.trans(img), torch.from_numpy(keypoints.copy()).float(), torch.from_numpy(target.copy()).float(), st_size
+
 
 

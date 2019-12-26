@@ -62,7 +62,7 @@ class SCAR(nn.Module):
         x = self.frontend(x)
         x = self.backend(x)
         x = self.output_layer(x)
-        x = F.upsample(x,scale_factor=8)
+        # x = F.upsample(x,scale_factor=8)
         return x
 
 class SCAModule(nn.Module):

@@ -11,7 +11,7 @@ class convDU(nn.Module):
     def __init__(self,in_out_channels=2048,kernel_size=(9,1)):
         super(convDU, self).__init__()
         self.conv = nn.Sequential(
-            nn.Conv2d(in_out_channels, in_out_channels, kernel_size, stride=1, padding=((kernel_size[0]-1)/2,(kernel_size[1]-1)/2)),
+            nn.Conv2d(in_out_channels, in_out_channels, kernel_size, stride=1, padding=(int((kernel_size[0]-1)/2),int((kernel_size[1]-1)/2))),
             nn.ReLU(inplace=True)
             )
 
@@ -39,7 +39,7 @@ class convLR(nn.Module):
     def __init__(self,in_out_channels=2048,kernel_size=(1,9)):
         super(convLR, self).__init__()
         self.conv = nn.Sequential(
-            nn.Conv2d(in_out_channels, in_out_channels, kernel_size, stride=1, padding=((kernel_size[0]-1)/2,(kernel_size[1]-1)/2)),
+            nn.Conv2d(in_out_channels, in_out_channels, kernel_size, stride=1, padding=(int((kernel_size[0]-1)/2),int((kernel_size[1]-1)/2))),
             nn.ReLU(inplace=True))
 
     def forward(self, fea):
@@ -96,7 +96,7 @@ class SFCN(nn.Module):
         x = self.convLR(x)
         x = self.output_layer(x)
 
-        x = F.upsample(x, scale_factor=8)
+        # x = F.upsample(x, scale_factor=8)
         return x
 
     def _initialize_weights(self):

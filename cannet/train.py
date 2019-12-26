@@ -14,6 +14,10 @@ def parse_args():
                         help='training data directory')
     parser.add_argument('--save-dir', default='/home/teddy/vgg',
                         help='directory to save models.')
+    parser.add_argument('--use-joint-dataset', type=bool,default=False,
+                        help='whether to combine shanghaiTech and UCF dataset.')
+    parser.add_argument('--joint-dir', default=['/home/teddy/UCF-Train-Val-Test','/home/teddy/UCF-Train-Val-Test'],type=list,
+                        help='joint datasets dir')
 
     parser.add_argument('--lr', type=float, default=1e-5,
                         help='the initial learning rate')
