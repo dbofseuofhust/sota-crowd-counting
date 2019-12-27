@@ -3,3 +3,4 @@
 *.pyc
 outputs/
 crowd_counting_pytorch.egg-info/
+src/outputs/

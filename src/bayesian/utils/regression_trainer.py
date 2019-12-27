@@ -1,5 +1,5 @@
-from .trainer import Trainer
-from .helper import Save_Handle, AverageMeter
+from utils.trainer import Trainer
+from utils.helper import Save_Handle, AverageMeter
 import os
 import sys
 import time
@@ -9,13 +9,11 @@ from torch.utils.data import DataLoader
 from torch.utils.data.dataloader import default_collate
 import logging
 import numpy as np
-from ..models.vgg import vgg19
-from ..datasets.crowd import Crowd,CrowdJoint
-from ..losses.bay_loss import Bay_Loss
-from ..losses.post_prob import Post_Prob
-from ..models import get_models
-from .lr_scheduler import WarmupMultiStepLR
-from tqdm import tqdm
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from  models.vgg import vgg19
+from datasets.crowd import Crowd
+from losses.bay_loss import Bay_Loss
+from losses.post_prob import Post_Prob
 
 
 def train_collate(batch):
@@ -25,6 +23,7 @@ def train_collate(batch):
     targets = transposed_batch[2]
     st_sizes = torch.FloatTensor(transposed_batch[3])
     return images, points, targets, st_sizes
+
 
 class RegTrainer(Trainer):
     def setup(self):
@@ -40,50 +39,22 @@ class RegTrainer(Trainer):
             raise Exception("gpu is not available")
 
         self.downsample_ratio = args.downsample_ratio
-        self.use_joint_dataset = args.use_joint_dataset
-        self.STEPS = [int(v) for v in args.steps.split(',')]
-        self.WARMUP_EPOCH = args.warmup_epoch
-
-        if self.use_joint_dataset:
-            args.joint_dir = args.joint_dir.split(',')
-            self.datasets = {x: CrowdJoint(os.path.join(args.joint_dir[0], x, 'images'), os.path.join(args.joint_dir[1], x, 'images'), os.path.join(args.joint_dir[2], x),
-                                      args.crop_size,
-                                      args.downsample_ratio,
-                                      args.is_gray, x) for x in ['train', 'val']}
-
-            self.dataloaders = {x: DataLoader(self.datasets[x],
-                                              collate_fn=(train_collate
-                                              if x == 'train' else default_collate),
-                                              batch_size=(args.batch_size
-                                              if x == 'train' else 1),
-                                              shuffle=(True if x == 'train' else False),
-                                              num_workers=args.num_workers * self.device_count,
-                                              pin_memory=(True if x == 'train' else False))
-                                for x in ['train', 'val']}
-        else:
-            self.datasets = {x: Crowd(os.path.join(args.data_dir, x),
-                                      args.crop_size,
-                                      args.downsample_ratio,
-                                      args.is_gray, x) for x in ['train', 'val']}
-
-            self.dataloaders = {x: DataLoader(self.datasets[x],
-                                              collate_fn=(train_collate
-                                              if x == 'train' else default_collate),
-                                              batch_size=(args.batch_size
-                                              if x == 'train' else 1),
-                                              shuffle=(True if x == 'train' else False),
-                                              num_workers=args.num_workers * self.device_count,
-                                              pin_memory=(True if x == 'train' else False))
-                                for x in ['train', 'val']}
-
-        # self.model = vgg19()
-
-        self.model = get_models(self.args.model)()
-
+        self.datasets = {x: Crowd(os.path.join(args.data_dir, x),
+                                  args.crop_size,
+                                  args.downsample_ratio,
+                                  args.is_gray, x) for x in ['train', 'val']}
+        self.dataloaders = {x: DataLoader(self.datasets[x],
+                                          collate_fn=(train_collate
+                                                      if x == 'train' else default_collate),
+                                          batch_size=(args.batch_size
+                                          if x == 'train' else 1),
+                                          shuffle=(True if x == 'train' else False),
+                                          num_workers=args.num_workers*self.device_count,
+                                          pin_memory=(True if x == 'train' else False))
+                            for x in ['train', 'val']}
+        self.model =vgg19()
         self.model.to(self.device)
-
         self.optimizer = optim.Adam(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-        # self.scheduler = WarmupMultiStepLR(self.optimizer, self.STEPS, 0.1, 0.1,self.WARMUP_EPOCH, 'linear')
 
         self.start_epoch = 0
         if args.resume:
@@ -102,9 +73,7 @@ class RegTrainer(Trainer):
                                    args.background_ratio,
                                    args.use_background,
                                    self.device)
-
         self.criterion = Bay_Loss(args.use_background, self.device)
-
         self.save_list = Save_Handle(max_num=args.max_model_num)
         self.best_mae = np.inf
         self.best_mse = np.inf
@@ -125,12 +94,10 @@ class RegTrainer(Trainer):
         epoch_mae = AverageMeter()
         epoch_mse = AverageMeter()
         epoch_start = time.time()
-
         self.model.train()  # Set model to training mode
-        # self.scheduler.step()
 
         # Iterate over data.
-        for step, (inputs, points, targets, st_sizes) in enumerate(tqdm(self.dataloaders['train'])):
+        for step, (inputs, points, targets, st_sizes) in enumerate(self.dataloaders['train']):
             inputs = inputs.to(self.device)
             st_sizes = st_sizes.to(self.device)
             gd_count = np.array([len(p) for p in points], dtype=np.float32)
@@ -140,7 +107,6 @@ class RegTrainer(Trainer):
             with torch.set_grad_enabled(True):
                 outputs = self.model(inputs)
                 prob_list = self.post_prob(points, st_sizes)
-
                 loss = self.criterion(prob_list, targets, outputs)
 
                 self.optimizer.zero_grad()
@@ -171,7 +137,7 @@ class RegTrainer(Trainer):
         self.model.eval()  # Set model to evaluate mode
         epoch_res = []
         # Iterate over data.
-        for inputs, count, name in tqdm(self.dataloaders['val']):
+        for inputs, count, name in self.dataloaders['val']:
             inputs = inputs.to(self.device)
             # inputs are images with different sizes
             assert inputs.size(0) == 1, 'the batch size should equal to 1 in validation mode'

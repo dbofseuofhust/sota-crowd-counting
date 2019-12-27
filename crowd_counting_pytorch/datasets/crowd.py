@@ -82,13 +82,6 @@ class Crowd(data.Dataset):
         wd, ht = img.size
         st_size = min(wd, ht)
 
-        # if st_size <= self.c_size:
-        #     scale = int(self.c_size / st_size)+1
-        #     wd = int(wd*scale)
-        #     ht = int(ht*scale)
-        #     img = img.resize((wd,ht))
-        #     keypoints = np.resize(keypoints,(wd,ht))
-
         assert st_size >= self.c_size
         assert len(keypoints) > 0
         i, j, h, w = random_crop(ht, wd, self.c_size, self.c_size)
@@ -178,7 +171,7 @@ class CrowdSHT(data.Dataset):
             wd = int(wd*scale)
             ht = int(ht*scale)
             img = img.resize((wd,ht))
-            keypoints = np.resize(keypoints,(wd,ht))
+            keypoints = np.resize(keypoints, (wd, ht)) / scale / scale
 
         # assert st_size >= self.c_size
         assert len(keypoints) > 0
@@ -279,7 +272,7 @@ class CrowdJoint(data.Dataset):
             wd = int(wd*scale)
             ht = int(ht*scale)
             img = img.resize((wd,ht))
-            keypoints = np.resize(keypoints,(wd,ht))
+            keypoints = np.resize(keypoints,(wd,ht)) / scale /scale
 
         # assert st_size >= self.c_size
         assert len(keypoints) > 0
