@@ -65,14 +65,37 @@ class Crowd(data.Dataset):
         img = Image.open(img_path).convert('RGB')
         if self.method == 'train':
             keypoints = np.load(gd_path)
+
+            # resize
+            # wd, ht = img.size
+            # scale_wd = self.c_size / wd
+            # scale_ht = self.c_size / ht
+            # img = img.resize((self.c_size, self.c_size))
+            # keypoints = np.resize(keypoints, (wd, ht)) / scale_wd / scale_ht
+
             return self.train_transform(img, keypoints)
         elif self.method == 'val':
             keypoints = np.load(gd_path)
+
+            # resize
+            # wd, ht = img.size
+            # scale_wd = self.c_size / wd
+            # scale_ht = self.c_size / ht
+            # img = img.resize((self.c_size, self.c_size))
+            # keypoints = np.resize(keypoints, (wd, ht)) / scale_wd / scale_ht
+
             img = self.trans(img)
             name = os.path.basename(img_path).split('.')[0]
             return img, len(keypoints), name
         elif self.method == 'test':
-            img = img.resize((self.c_size, self.c_size),Image.ANTIALIAS)
+
+            wd, ht = img.size
+            max_size = max(wd,ht)
+            if max_size > self.c_size:
+                scale = self.c_size / max_size
+            else:
+                scale = 1
+            img = img.resize((int(wd*scale), int(ht*scale)),Image.ANTIALIAS)
             img = self.trans(img)
             name = os.path.basename(img_path)
             return img, name

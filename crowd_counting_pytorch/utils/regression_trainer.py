@@ -30,12 +30,13 @@ class RegTrainer(Trainer):
     def setup(self):
         """initial the datasets, model, loss and optimizer"""
         args = self.args
+        self.gpus = args.device.strip().split(',')
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
             self.device_count = torch.cuda.device_count()
             # for code conciseness, we release the single gpu version
-            assert self.device_count == 1
-            logging.info('using {} gpus'.format(self.device_count))
+            # assert self.device_count == 1
+            logging.info('using {} gpus'.format(self.args.device))
         else:
             raise Exception("gpu is not available")
 
@@ -81,6 +82,9 @@ class RegTrainer(Trainer):
         self.model = get_models(self.args.model)()
 
         self.model.to(self.device)
+
+        if len(self.gpus) > 1:
+            self.model = torch.nn.DataParallel(self.model)
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         # self.scheduler = WarmupMultiStepLR(self.optimizer, self.STEPS, 0.1, 0.1,self.WARMUP_EPOCH, 'linear')
@@ -130,7 +134,8 @@ class RegTrainer(Trainer):
         # self.scheduler.step()
 
         # Iterate over data.
-        for step, (inputs, points, targets, st_sizes) in enumerate(tqdm(self.dataloaders['train'])):
+        # for step, (inputs, points, targets, st_sizes) in enumerate(tqdm(self.dataloaders['train'])):
+        for step, (inputs, points, targets, st_sizes) in enumerate(self.dataloaders['train']):
             inputs = inputs.to(self.device)
             st_sizes = st_sizes.to(self.device)
             gd_count = np.array([len(p) for p in points], dtype=np.float32)
@@ -138,10 +143,14 @@ class RegTrainer(Trainer):
             targets = [t.to(self.device) for t in targets]
 
             with torch.set_grad_enabled(True):
-                outputs = self.model(inputs)
-                prob_list = self.post_prob(points, st_sizes)
-
-                loss = self.criterion(prob_list, targets, outputs)
+                if 'fpn' in self.args.model:
+                    outputs, x2outputs, x3outputs, x4outputs = self.model(inputs)
+                    prob_list = self.post_prob(points, st_sizes)
+                    loss = sum([self.criterion(prob_list, targets, preds) for preds in [outputs, x2outputs, x3outputs, x4outputs]])
+                else:
+                    outputs = self.model(inputs)
+                    prob_list = self.post_prob(points, st_sizes)
+                    loss = self.criterion(prob_list, targets, outputs)
 
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -153,6 +162,12 @@ class RegTrainer(Trainer):
                 epoch_loss.update(loss.item(), N)
                 epoch_mse.update(np.mean(res * res), N)
                 epoch_mae.update(np.mean(abs(res)), N)
+
+                if step % 20 == 0:
+                    print('Train Epoch {} [{}/{}] , Loss: {:.2f}, MSE: {:.2f} MAE: {:.2f}, Cost {:.1f} sec'
+                          .format(self.epoch, step, len(self.dataloaders['train']), epoch_loss.get_avg(),
+                                  np.sqrt(epoch_mse.get_avg()), epoch_mae.get_avg(),
+                                  time.time() - epoch_start))
 
         logging.info('Epoch {} Train, Loss: {:.2f}, MSE: {:.2f} MAE: {:.2f}, Cost {:.1f} sec'
                      .format(self.epoch, epoch_loss.get_avg(), np.sqrt(epoch_mse.get_avg()), epoch_mae.get_avg(),

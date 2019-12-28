@@ -137,12 +137,99 @@ UCF=/data/deeplearning/crowdcounting/UCF-Train-Val-Test
 #                         --val-epoch 1 \
 #                         --val-start 0
 
-CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannet --save-dir outputs/oricannet_bs16_joint \
-                         --batch-size 16 \
+#CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannet --save-dir outputs/oricannet_bs16_joint \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 3 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --use-joint-dataset True \
+#                         --joint-dir ${SHTA},${SHTB},${UCF}
+
+#CUDA_VISIBLE_DEVICES=2,3 python shells/train.py --model c3f_sanet --save-dir outputs/c3f_sanet_bs16 \
+#                         --batch-size 8 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 2,3 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 1
+
+#CUDA_VISIBLE_DEVICES=1 python shells/train.py --model c3f_csrnet --save-dir outputs/c3f_csrnet_bs16 \
+#                         --batch-size 4 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 1 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 1
+
+#CUDA_VISIBLE_DEVICES=1 python -u shells/train.py --model c3f_res101_sfcn --save-dir outputs/c3f_res101_sfcn_bs16 \
+#                         --batch-size 8 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 1 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 8
+
+#CUDA_VISIBLE_DEVICES=3 python -u shells/train.py --model res50_fpn --save-dir outputs/res50_fpn_bs16 \
+#                         --batch-size 4 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 3 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 1
+
+#CUDA_VISIBLE_DEVICES=3 python -u shells/train.py --model scar --save-dir outputs/scar_bs16 \
+#                         --batch-size 8 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 3 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 8
+
+#-----------------------------------------------Mutil GPU-----------------------------------------------#
+
+#CUDA_VISIBLE_DEVICES=0,1 python shells/train.py --model oricannet --save-dir outputs/oricannet_mutilgpu \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 0,1 \
+#                         --val-epoch 1 \
+#                         --val-start 0
+
+#CUDA_VISIBLE_DEVICES=2,3 python shells/train.py --model bayesian --save-dir outputs/bayesian_mutilgpu \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 2,3 \
+#                         --val-epoch 1 \
+#                         --val-start 0
+
+#-----------------------------------------------Single GPU-----------------------------------------------#
+
+#CUDA_VISIBLE_DEVICES=2 python shells/train.py --model bayesian --save-dir outputs/bayesian \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 2 \
+#                         --val-epoch 1 \
+#                         --val-start 0
+
+#CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannet --save-dir outputs/oricannet \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 3 \
+#                         --val-epoch 1 \
+#                         --val-start 0
+
+#CUDA_VISIBLE_DEVICES=1 python shells/train.py --model c3f_csrnet --save-dir outputs/c3f_csrnet \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 1 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 8
+
+CUDA_VISIBLE_DEVICES=0 python shells/train.py --model sfcn --save-dir outputs/sfcn \
+                         --batch-size 12 \
                          --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
-                         --device 3 \
+                         --device 0 \
                          --val-epoch 1 \
                          --val-start 0 \
-                         --use-joint-dataset True \
-                         --joint-dir ${SHTA},${SHTB},${UCF}
-
+                         --downsample-ratio 8

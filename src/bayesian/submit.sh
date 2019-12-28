@@ -7,6 +7,6 @@
 #                         --data-dir /data/deeplearning/CC/test/A \
 #                         --sub-name bayesian_joint_noscale_vgg19.csv
 
-CUDA_VISIBLE_DEVICES=0 python bayesian/submit.py --model bayesian --save-dir outputs/bayesian_joint_scale/1227-001358 \
+CUDA_VISIBLE_DEVICES=1 python bayesian/submit.py --save-dir /home/dongbin/DeepBlueAI/sota-crowd-counting/outputs/bayesian \
                          --data-dir /data/deeplearning/CC/test/A \
-                         --sub-name bayesian_joint_scale_vgg19.csv
+                         --sub-name ori_bayesian_vgg19.csv

@@ -11,7 +11,7 @@ import pandas as pd
 
 args = None
 
-def cal_mae(dataloader,model,model_param_path):
+def cal_mae(dataloader,model_param_path):
     '''
     Calculate the MAE of the test data.
     img_root: the root of test image data.
@@ -39,7 +39,7 @@ def cal_mae(dataloader,model,model_param_path):
     log_str = 'Final Test: mae {}, mse {}'.format(mae, mse)
     print(log_str)
 
-def estimate_density_map(dataloader,model,model_param_path,index=None,saveroot=None):
+def estimate_density_map(dataloader,model_param_path,index=None,saveroot=None):
     '''
     Show one estimated density-map.
     img_root: the root of test image data.
@@ -76,7 +76,7 @@ def estimate_density_map(dataloader,model,model_param_path,index=None,saveroot=N
             et_dmap = et_dmap.squeeze(0).squeeze(0).cpu().numpy()
             plt.imsave(os.path.join(saveroot, '{}.png'.format(name[0])),et_dmap,cmap=CM.jet)
 
-def crowd_counting(dataloader,model,model_param_path,savecsv):
+def crowd_counting(dataloader,model_param_path,savecsv):
     '''
     Show one estimated density-map.
     img_root: the root of test image data.
@@ -113,8 +113,6 @@ def parse_args():
                         help='model directory')
     parser.add_argument('--sub-name', default='/home/teddy/vgg',
                         help='model directory')
-    parser.add_argument('--model', default='/home/teddy/vgg',
-                        help='model directory')
     args = parser.parse_args()
     return args
 
@@ -130,5 +128,5 @@ if __name__ == '__main__':
     saveroot = os.path.join(args.save_dir,'sub')
     if not os.path.exists(saveroot):
         os.makedirs(saveroot)
-    crowd_counting(dataloader,args.model,model_param_path,os.path.join(saveroot,args.sub_name))
+    crowd_counting(dataloader,model_param_path,os.path.join(saveroot,args.sub_name))
 

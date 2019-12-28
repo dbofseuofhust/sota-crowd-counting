@@ -125,7 +125,8 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    datasets = ccp.Crowd(args.data_dir, 544, 8, is_gray=False, method='test')
+    datasets = ccp.Crowd(args.data_dir, 2560, 8, is_gray=False, method='test')
+    # datasets = ccp.Crowd(args.data_dir, 2048, 8, is_gray=False, method='test')
     dataloader = torch.utils.data.DataLoader(datasets, 1, shuffle=False,
                                              num_workers=8, pin_memory=False)
 
