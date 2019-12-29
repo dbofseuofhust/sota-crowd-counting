@@ -19,11 +19,6 @@
 #                         --data-dir /data/deeplearning/CC/test/A \
 #                         --sub-name bayesian_full_scale_vgg19.csv
 
-
-
-
-
-
 #CUDA_VISIBLE_DEVICES=0 python shells/submit.py --model bayesian --save-dir outputs/before/bayesian/1225-001646 \
 #                         --data-dir /data/deeplearning/CC/test/A \
 #                         --sub-name bayesian_full_scale_vgg19.csv
@@ -36,6 +31,18 @@
 #                         --data-dir /data/deeplearning/CC/test/A \
 #                         --sub-name sfcn_full_scale_vgg19.csv
 
-CUDA_VISIBLE_DEVICES=0 python shells/submit.py --model bayesian --save-dir outputs/before/bayesian_joint_scale/1227-001358 \
+#CUDA_VISIBLE_DEVICES=0 python shells/submit.py --model bayesian --save-dir outputs/before/bayesian_joint_scale/1227-001358 \
+#                         --data-dir /data/deeplearning/CC/test/A \
+#                         --sub-name bayesian_joint_scale_full_scale_vgg19.csv
+
+#CUDA_VISIBLE_DEVICES=1 python shells/submit.py --model oricannet --save-dir outputs/oricannet/1228-122712 \
+#                         --data-dir /data/deeplearning/CC/test/A \
+#                         --sub-name fine_oricannet_scale_full_scale_vgg19.csv
+
+#CUDA_VISIBLE_DEVICES=1 python shells/submit.py --model sfcn --save-dir outputs/sfcn/1228-131623 \
+#                         --data-dir /data/deeplearning/CC/test/A \
+#                         --sub-name fine_sfcn_scale_full_scale_vgg19.csv
+
+CUDA_VISIBLE_DEVICES=1 python shells/submit.py --model c3f_csrnet --save-dir outputs/c3f_csrnet/1228-123254 \
                          --data-dir /data/deeplearning/CC/test/A \
-                         --sub-name bayesian_joint_scale_full_scale_vgg19.csv
+                         --sub-name fine_c3f_csrnet_scale_full_scale_vgg19.csv

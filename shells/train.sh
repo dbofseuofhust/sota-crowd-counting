@@ -234,10 +234,20 @@ UCF=/data/deeplearning/crowdcounting/UCF-Train-Val-Test
 #                         --val-start 0 \
 #                         --downsample-ratio 8
 
-CUDA_VISIBLE_DEVICES=2 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr \
+#CUDA_VISIBLE_DEVICES=2 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 2 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --steps 300,600
+
+CUDA_VISIBLE_DEVICES=1 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr_jointdataset \
                          --batch-size 16 \
                          --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
-                         --device 2 \
+                         --device 1 \
                          --val-epoch 1 \
                          --val-start 0 \
-                         --steps 300,600
+                         --steps 300,600 \
+                         --use-joint-dataset True \
+                         --joint-dir ${SHTA},${SHTB},${UCF}

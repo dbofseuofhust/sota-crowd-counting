@@ -47,10 +47,24 @@ class RegTrainer(Trainer):
 
         if self.use_joint_dataset:
             args.joint_dir = args.joint_dir.split(',')
-            self.datasets = {x: CrowdJoint(os.path.join(args.joint_dir[0], x, 'images'), os.path.join(args.joint_dir[1], x, 'images'), os.path.join(args.joint_dir[2], x),
+
+            # self.datasets = {x: CrowdJoint(os.path.join(args.joint_dir[0], x, 'images'), os.path.join(args.joint_dir[1], x, 'images'), os.path.join(args.joint_dir[2], x),
+            #                           args.crop_size,
+            #                           args.downsample_ratio,
+            #                           args.is_gray, x) for x in ['train', 'val']}
+
+            self.datasets = {'train': CrowdJoint([os.path.join(args.joint_dir[0], 'train', 'images'),
+                                                  os.path.join(args.joint_dir[1], 'train', 'images'),
+                                                  os.path.join(args.joint_dir[0], 'val', 'images'),
+                                                  os.path.join(args.joint_dir[1], 'val', 'images'),
+                                                  os.path.join(args.joint_dir[2], 'train')],
                                       args.crop_size,
                                       args.downsample_ratio,
-                                      args.is_gray, x) for x in ['train', 'val']}
+                                      args.is_gray, 'train'),
+                             'val': CrowdJoint([os.path.join(args.joint_dir[2], 'val')],
+                                      args.crop_size,
+                                      args.downsample_ratio,
+                                      args.is_gray, 'val')}
 
             self.dataloaders = {x: DataLoader(self.datasets[x],
                                               collate_fn=(train_collate
