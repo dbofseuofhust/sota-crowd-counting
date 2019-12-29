@@ -88,6 +88,8 @@ class RegTrainer(Trainer):
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         # self.scheduler = WarmupMultiStepLR(self.optimizer, self.STEPS, 0.1, 0.1,self.WARMUP_EPOCH, 'linear')
+        if self.STEPS is not None:
+            self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, self.STEPS, gamma=0.1, last_epoch=-1)
 
         self.start_epoch = 0
         if args.resume:
@@ -119,6 +121,8 @@ class RegTrainer(Trainer):
         args = self.args
         for epoch in range(self.start_epoch, args.max_epoch):
             logging.info('-'*5 + 'Epoch {}/{}'.format(epoch, args.max_epoch - 1) + '-'*5)
+            if self.STEPS is not None:
+                self.scheduler.step()
             self.epoch = epoch
             self.train_eopch()
             if epoch % args.val_epoch == 0 and epoch >= args.val_start:
@@ -131,7 +135,6 @@ class RegTrainer(Trainer):
         epoch_start = time.time()
 
         self.model.train()  # Set model to training mode
-        # self.scheduler.step()
 
         # Iterate over data.
         # for step, (inputs, points, targets, st_sizes) in enumerate(tqdm(self.dataloaders['train'])):
@@ -164,7 +167,7 @@ class RegTrainer(Trainer):
                 epoch_mae.update(np.mean(abs(res)), N)
 
                 if step % 20 == 0:
-                    print('Train Epoch {} [{}/{}] , Loss: {:.2f}, MSE: {:.2f} MAE: {:.2f}, Cost {:.1f} sec'
+                    print('Train Epoch {} [{}/{}], Loss: {:.2f}, MSE: {:.2f} MAE: {:.2f}, Cost {:.1f} sec'
                           .format(self.epoch, step, len(self.dataloaders['train']), epoch_loss.get_avg(),
                                   np.sqrt(epoch_mse.get_avg()), epoch_mae.get_avg(),
                                   time.time() - epoch_start))

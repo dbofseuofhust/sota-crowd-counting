@@ -226,10 +226,18 @@ UCF=/data/deeplearning/crowdcounting/UCF-Train-Val-Test
 #                         --val-start 0 \
 #                         --downsample-ratio 8
 
-CUDA_VISIBLE_DEVICES=0 python shells/train.py --model sfcn --save-dir outputs/sfcn \
-                         --batch-size 12 \
+#CUDA_VISIBLE_DEVICES=0 python shells/train.py --model sfcn --save-dir outputs/sfcn \
+#                         --batch-size 12 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 0 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 8
+
+CUDA_VISIBLE_DEVICES=2 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr \
+                         --batch-size 16 \
                          --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
-                         --device 0 \
+                         --device 2 \
                          --val-epoch 1 \
                          --val-start 0 \
-                         --downsample-ratio 8
+                         --steps 300,600

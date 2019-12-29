@@ -30,7 +30,7 @@ def parse_args():
                         help='max training epoch')
     parser.add_argument('--warmup-epoch', type=int, default=20,
                         help='max training epoch')
-    parser.add_argument('--steps', type=str, default='300,600',
+    parser.add_argument('--steps', type=str, default=None,
                         help='max training epoch')
 
     parser.add_argument('--val-epoch', type=int, default=5,
