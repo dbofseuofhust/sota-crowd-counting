@@ -4,7 +4,7 @@ from .sfcn import SFCN
 from .sfanet import SFANet
 from .asd import ASD
 from .scar import SCAR
-from .oricannet import OriCANNet
+from .oricannet import OriCANNet,OriCANNetVGG19
 from .c3f import *
 from .res50_fpn import Res50_FPN
 from .res101_fpn import Res101_FPN
@@ -19,6 +19,7 @@ def get_models(model_name,pretrained=True):
         'asd': ASD,
         'scar': SCAR,
         'oricannet': OriCANNet,
+        'oricannetvgg19': OriCANNetVGG19,
         'cf3_alexnet': AlexNet,
         'c3f_csrnet': CSRNet,
         'c3f_mcnn': MCNN,

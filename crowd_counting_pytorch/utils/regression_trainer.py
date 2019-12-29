@@ -42,7 +42,12 @@ class RegTrainer(Trainer):
 
         self.downsample_ratio = args.downsample_ratio
         self.use_joint_dataset = args.use_joint_dataset
-        self.STEPS = [int(v) for v in args.steps.split(',')]
+        
+        if args.steps is not None:
+            self.STEPS = [int(v) for v in args.steps.split(',')]
+        else:
+            self.STEPS = None
+
         self.WARMUP_EPOCH = args.warmup_epoch
 
         if self.use_joint_dataset:
@@ -97,11 +102,16 @@ class RegTrainer(Trainer):
 
         self.model.to(self.device)
 
+        self.best_mae = np.inf
+        self.best_mse = np.inf
+        self.best_count = 0
+
         if len(self.gpus) > 1:
             self.model = torch.nn.DataParallel(self.model)
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         # self.scheduler = WarmupMultiStepLR(self.optimizer, self.STEPS, 0.1, 0.1,self.WARMUP_EPOCH, 'linear')
+
         if self.STEPS is not None:
             self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, self.STEPS, gamma=0.1, last_epoch=-1)
 
@@ -113,6 +123,8 @@ class RegTrainer(Trainer):
                 self.model.load_state_dict(checkpoint['model_state_dict'])
                 self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
                 self.start_epoch = checkpoint['epoch'] + 1
+                self.best_mse = checkpoint['best_mse']
+                self.best_mae = checkpoint['best_mae']
             elif suf == 'pth':
                 self.model.load_state_dict(torch.load(args.resume, self.device))
 
@@ -126,9 +138,6 @@ class RegTrainer(Trainer):
         self.criterion = Bay_Loss(args.use_background, self.device)
 
         self.save_list = Save_Handle(max_num=args.max_model_num)
-        self.best_mae = np.inf
-        self.best_mse = np.inf
-        self.best_count = 0
 
     def train(self):
         """training process"""
@@ -194,7 +203,9 @@ class RegTrainer(Trainer):
         torch.save({
             'epoch': self.epoch,
             'optimizer_state_dict': self.optimizer.state_dict(),
-            'model_state_dict': model_state_dic
+            'model_state_dict': model_state_dic,
+            'best_mse': self.best_mse,
+            'best_mae': self.best_mae,
         }, save_path)
         self.save_list.append(save_path)  # control the number of saved models
 

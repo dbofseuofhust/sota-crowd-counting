@@ -242,12 +242,81 @@ UCF=/data/deeplearning/crowdcounting/UCF-Train-Val-Test
 #                         --val-start 0 \
 #                         --steps 300,600
 
-CUDA_VISIBLE_DEVICES=1 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr_jointdataset \
+#-----------------------------------------------Resume-----------------------------------------------#
+
+#CUDA_VISIBLE_DEVICES=1 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr_jointdataset \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 1 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --steps 300,600 \
+#                         --use-joint-dataset True \
+#                         --joint-dir ${SHTA},${SHTB},${UCF} \
+#                         --resume outputs/oricannet_steplr_jointdataset/1229-141742/6_ckpt.tar
+
+#CUDA_VISIBLE_DEVICES=2 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 2 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --steps 300,600 \
+#                         --resume outputs/oricannet_steplr/1229-121332/77_ckpt.tar
+
+#CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannet --save-dir outputs/oricannet \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 3 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --resume outputs/oricannet/1228-122712/898_ckpt.tar \
+#                         --steps 300,600
+
+#CUDA_VISIBLE_DEVICES=0 python shells/train.py --model sfcn --save-dir outputs/sfcn \
+#                         --batch-size 12 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 0 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 8 \
+#                         --resume outputs/sfcn/1228-131623/501_ckpt.tar \
+#                         --steps 300,600
+
+#-----------------------------------------------Mutil Steps-----------------------------------------------#
+
+#CUDA_VISIBLE_DEVICES=2 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 2 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --steps 300,600
+
+#CUDA_VISIBLE_DEVICES=1 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr_jointdataset \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 1 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --steps 300,600 \
+#                         --use-joint-dataset True \
+#                         --joint-dir ${SHTA},${SHTB},${UCF}
+
+#CUDA_VISIBLE_DEVICES=0 python shells/train.py --model sfcn --save-dir outputs/sfcn \
+#                         --batch-size 12 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 0 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 8 \
+#                         --steps 300,600
+
+CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannetvgg19 --save-dir outputs/oricannetvgg19 \
                          --batch-size 16 \
                          --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
-                         --device 1 \
+                         --device 3 \
                          --val-epoch 1 \
                          --val-start 0 \
-                         --steps 300,600 \
-                         --use-joint-dataset True \
-                         --joint-dir ${SHTA},${SHTB},${UCF}
+                         --downsample-ratio 8 \
+                         --steps 300,600
