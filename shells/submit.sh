@@ -43,6 +43,14 @@
 #                         --data-dir /data/deeplearning/CC/test/A \
 #                         --sub-name fine_sfcn_scale_full_scale_vgg19.csv
 
-CUDA_VISIBLE_DEVICES=1 python shells/submit.py --model c3f_csrnet --save-dir outputs/c3f_csrnet/1228-123254 \
+#CUDA_VISIBLE_DEVICES=1 python shells/submit.py --model c3f_csrnet --save-dir outputs/c3f_csrnet/1228-123254 \
+#                         --data-dir /data/deeplearning/CC/test/A \
+#                         --sub-name fine_c3f_csrnet_scale_full_scale_vgg19.csv
+
+#CUDA_VISIBLE_DEVICES=2 python shells/submit.py --model oricannetvgg19 --save-dir outputs/oricannetvgg19/1229-154326 \
+#                         --data-dir /data/deeplearning/CC/test/A \
+#                         --sub-name step_fine_oricannetvgg19_scale_full_scale_vgg19.csv
+
+CUDA_VISIBLE_DEVICES=2 python shells/submit.py --model oricannet --save-dir outputs/oricannet/1228-122712 \
                          --data-dir /data/deeplearning/CC/test/A \
-                         --sub-name fine_c3f_csrnet_scale_full_scale_vgg19.csv
+                         --sub-name _fine_oricannet_scale_full_scale_vgg19.csv

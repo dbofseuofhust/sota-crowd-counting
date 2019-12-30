@@ -24,6 +24,8 @@ def parse_args():
                         help='the weight decay')
     parser.add_argument('--resume', default='',
                         help='the path of resume training model')
+    parser.add_argument('--trainval', type=bool,default=False,
+                        help='the path of resume training model')
     parser.add_argument('--max-model-num', type=int, default=1,
                         help='max models num to save ')
     parser.add_argument('--max-epoch', type=int, default=1000,

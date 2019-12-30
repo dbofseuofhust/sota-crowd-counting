@@ -42,59 +42,46 @@ class RegTrainer(Trainer):
 
         self.downsample_ratio = args.downsample_ratio
         self.use_joint_dataset = args.use_joint_dataset
-        
+        self.trainval = args.trainval
+
         if args.steps is not None:
             self.STEPS = [int(v) for v in args.steps.split(',')]
+            logging.info('using mutil step learning rate, [{}].'.format(args.steps))
         else:
             self.STEPS = None
 
         self.WARMUP_EPOCH = args.warmup_epoch
 
+        self.root_paths = args.data_dir.split(',')
+
         if self.use_joint_dataset:
-            args.joint_dir = args.joint_dir.split(',')
-
-            # self.datasets = {x: CrowdJoint(os.path.join(args.joint_dir[0], x, 'images'), os.path.join(args.joint_dir[1], x, 'images'), os.path.join(args.joint_dir[2], x),
-            #                           args.crop_size,
-            #                           args.downsample_ratio,
-            #                           args.is_gray, x) for x in ['train', 'val']}
-
-            self.datasets = {'train': CrowdJoint([os.path.join(args.joint_dir[0], 'train', 'images'),
-                                                  os.path.join(args.joint_dir[1], 'train', 'images'),
-                                                  os.path.join(args.joint_dir[0], 'val', 'images'),
-                                                  os.path.join(args.joint_dir[1], 'val', 'images'),
-                                                  os.path.join(args.joint_dir[2], 'train')],
+            self.datasets = {'train': Crowd([os.path.join(self.root_paths[-1], 'train')]+[os.path.join(v, 'trainval') for v in self.root_paths[:-1]],
                                       args.crop_size,
                                       args.downsample_ratio,
                                       args.is_gray, 'train'),
-                             'val': CrowdJoint([os.path.join(args.joint_dir[2], 'val')],
+                             'val': Crowd([os.path.join(self.root_paths[-1], 'val')],
                                       args.crop_size,
                                       args.downsample_ratio,
-                                      args.is_gray, 'val')}
-
-            self.dataloaders = {x: DataLoader(self.datasets[x],
-                                              collate_fn=(train_collate
-                                              if x == 'train' else default_collate),
-                                              batch_size=(args.batch_size
-                                              if x == 'train' else 1),
-                                              shuffle=(True if x == 'train' else False),
-                                              num_workers=args.num_workers * self.device_count,
-                                              pin_memory=(True if x == 'train' else False))
-                                for x in ['train', 'val']}
+                                      args.is_gray, 'val'),
+                             'trainval': Crowd([os.path.join(v, 'trainval') for v in self.root_paths],
+                                      args.crop_size,
+                                      args.downsample_ratio,
+                                      args.is_gray, 'trainval')}
         else:
-            self.datasets = {x: Crowd(os.path.join(args.data_dir, x),
-                                      args.crop_size,
-                                      args.downsample_ratio,
-                                      args.is_gray, x) for x in ['train', 'val']}
+            self.datasets = {x: Crowd([os.path.join(v, x) for v in self.root_paths],
+                                          args.crop_size,
+                                          args.downsample_ratio,
+                                          args.is_gray, x) for x in ['train', 'val', 'trainval']}
 
-            self.dataloaders = {x: DataLoader(self.datasets[x],
-                                              collate_fn=(train_collate
-                                              if x == 'train' else default_collate),
-                                              batch_size=(args.batch_size
-                                              if x == 'train' else 1),
-                                              shuffle=(True if x == 'train' else False),
-                                              num_workers=args.num_workers * self.device_count,
-                                              pin_memory=(True if x == 'train' else False))
-                                for x in ['train', 'val']}
+        self.dataloaders = {x: DataLoader(self.datasets[x],
+                                                  collate_fn=(train_collate
+                                                  if x in ['train','trainval'] else default_collate),
+                                                  batch_size=(args.batch_size
+                                                  if x in ['train','trainval'] else 1),
+                                                  shuffle=(True if x in ['train','trainval'] else False),
+                                                  num_workers=args.num_workers * self.device_count,
+                                                  pin_memory=(True if x in ['train','trainval'] else False))
+                                    for x in ['train', 'val', 'trainval']}
 
         # self.model = vgg19()
 
@@ -127,6 +114,8 @@ class RegTrainer(Trainer):
                 self.best_mae = checkpoint['best_mae']
             elif suf == 'pth':
                 self.model.load_state_dict(torch.load(args.resume, self.device))
+
+            logging.info('resume from {}, best_mse is {}, best_mae is {}.'.format(args.resume,self.best_mse,self.best_mae))
 
         self.post_prob = Post_Prob(args.sigma,
                                    args.crop_size,
@@ -161,7 +150,13 @@ class RegTrainer(Trainer):
 
         # Iterate over data.
         # for step, (inputs, points, targets, st_sizes) in enumerate(tqdm(self.dataloaders['train'])):
-        for step, (inputs, points, targets, st_sizes) in enumerate(self.dataloaders['train']):
+
+        if self.trainval:
+            trainloader = self.dataloaders['trainval']
+        else:
+            trainloader = self.dataloaders['train']
+
+        for step, (inputs, points, targets, st_sizes) in enumerate(trainloader):
             inputs = inputs.to(self.device)
             st_sizes = st_sizes.to(self.device)
             gd_count = np.array([len(p) for p in points], dtype=np.float32)
@@ -191,7 +186,7 @@ class RegTrainer(Trainer):
 
                 if step % 20 == 0:
                     print('Train Epoch {} [{}/{}], Loss: {:.2f}, MSE: {:.2f} MAE: {:.2f}, Cost {:.1f} sec'
-                          .format(self.epoch, step, len(self.dataloaders['train']), epoch_loss.get_avg(),
+                          .format(self.epoch, step, len(trainloader), epoch_loss.get_avg(),
                                   np.sqrt(epoch_mse.get_avg()), epoch_mae.get_avg(),
                                   time.time() - epoch_start))
 

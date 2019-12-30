@@ -27,21 +27,23 @@ def cal_innner_area(c_left, c_up, c_right, c_down, bbox):
     return inner_area
 
 class Crowd(data.Dataset):
-    def __init__(self, root_path, crop_size,
+    def __init__(self, root_paths, crop_size,
                  downsample_ratio, is_gray=False,
                  method='train'):
 
-        self.root_path = root_path
-        if method not in ['train', 'val', 'test']:
+        self.root_paths = root_paths
+        if method not in ['train', 'val', 'test', 'trainval']:
             raise Exception("not implement")
         self.method = method
 
-        if not self.method == 'test':
-            self.im_list = sorted(glob(os.path.join(self.root_path, '*.jpg')))
+        self.im_list = []
+        if self.method == 'test':
+            self.im_list = sorted(glob(os.path.join(self.root_paths, '*.*')))
         else:
-            self.im_list = sorted(glob(os.path.join(self.root_path, '*.*')))
+            for v in self.root_paths:
+                self.im_list += sorted(glob(os.path.join(v, '*.jpg')))
 
-        print('loading {} images from {}.'.format(len(self.im_list), root_path))
+        print('loading {} images from {}.'.format(len(self.im_list),root_paths))
 
         self.c_size = crop_size
         self.d_ratio = downsample_ratio
@@ -66,7 +68,7 @@ class Crowd(data.Dataset):
         img_path = self.im_list[item]
         gd_path = img_path.replace('jpg', 'npy')
         img = Image.open(img_path).convert('RGB')
-        if self.method == 'train':
+        if self.method in ['train','trainval']:
             keypoints = np.load(gd_path)
             return self.train_transform(img, keypoints)
         elif self.method == 'val':
@@ -219,13 +221,18 @@ class CrowdJoint(data.Dataset):
             raise Exception("not implement")
         self.method = method
 
+        # if not self.method == 'test':
+        #     self.im_list = sorted(glob(os.path.join(self.shtecha_root_path, '*.jpg'))) + sorted(glob(os.path.join(self.shtechb_root_path, '*.jpg'))) + sorted(glob(os.path.join(self.ucf_root_path, '*.jpg')))
+        # else:
+        #     self.im_list = sorted(glob(os.path.join(self.shtecha_root_path, '*.*'))) + sorted(glob(os.path.join(self.shtechb_root_path, '*.*'))) + sorted(glob(os.path.join(self.ucf_root_path, '*.*')))
+
         self.im_list = []
         if not self.method == 'test':
             for u in root_lists:
                 self.im_list += sorted(glob(os.path.join(u, '*.jpg')))
 
             # when train, filter the img min(w,h) < crop_size, it may takes some times when load data.
-            # because scale the img and density will get worse results.
+            #
             if self.method == 'train':
                 self.filter_im_list = []
                 for v in self.im_list:
@@ -279,15 +286,7 @@ class CrowdJoint(data.Dataset):
             name = os.path.basename(img_path).split('.')[0]
             return img, len(keypoints), name
         elif self.method == 'test':
-
-            wd, ht = img.size
-            max_size = max(wd,ht)
-            if max_size > self.c_size:
-                scale = self.c_size / max_size
-            else:
-                scale = 1
-            img = img.resize((int(wd*scale), int(ht*scale)),Image.ANTIALIAS)
-
+            img = img.resize((self.c_size, self.c_size), Image.ANTIALIAS)
             img = self.trans(img)
             name = os.path.basename(img_path)
             return img, name
@@ -297,7 +296,15 @@ class CrowdJoint(data.Dataset):
         wd, ht = img.size
         st_size = min(wd, ht)
 
-        assert st_size >= self.c_size
+        # [todo] check here
+        if st_size <= self.c_size:
+            scale = int(self.c_size / st_size)+1
+            wd = int(wd*scale)
+            ht = int(ht*scale)
+            img = img.resize((wd,ht))
+            keypoints = np.resize(keypoints,(wd,ht)) / scale /scale
+
+        # assert st_size >= self.c_size
         assert len(keypoints) > 0
         i, j, h, w = random_crop(ht, wd, self.c_size, self.c_size)
         img = F.crop(img, i, j, h, w)

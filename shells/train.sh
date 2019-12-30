@@ -3,8 +3,8 @@
 #                         --batch-size 8 \
 #                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test
 
-SHTA=/data/deeplearning/CC/ShanghaiTech_Crowd_Counting_Dataset/part_A_final
-SHTB=/data/deeplearning/CC/ShanghaiTech_Crowd_Counting_Dataset/part_B_final
+SHTA=/data/deeplearning/crowdcounting/SHTA-Train-Val-Test
+SHTB=/data/deeplearning/crowdcounting/SHTB-Train-Val-Test
 UCF=/data/deeplearning/crowdcounting/UCF-Train-Val-Test
 
 #CUDA_VISIBLE_DEVICES=1 python cannet/train.py --model cannet --save-dir outputs/cannet \
@@ -312,11 +312,71 @@ UCF=/data/deeplearning/crowdcounting/UCF-Train-Val-Test
 #                         --downsample-ratio 8 \
 #                         --steps 300,600
 
-CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannetvgg19 --save-dir outputs/oricannetvgg19 \
-                         --batch-size 16 \
-                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
-                         --device 3 \
+#CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannetvgg19 --save-dir outputs/oricannetvgg19 \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 3 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --downsample-ratio 8 \
+#                         --steps 300,600
+
+#CUDA_VISIBLE_DEVICES=2 python shells/train.py --model oricannet --save-dir outputs/oricannet_steplr \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 2 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --steps 300,600 \
+#                         --resume outputs/oricannet_steplr/1229-151811/654_ckpt.tar
+
+#CUDA_VISIBLE_DEVICES=1 python shells/train.py --model oricannet --save-dir outputs/oricannet_pretrain_ucf_train_shanghaitechA \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 1 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --use-joint-dataset True \
+#                         --joint-dir ${SHTA},${UCF} \
+#                         --resume outputs/oricannet/1228-122712/best_model.pth
+
+#CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannet --save-dir outputs/oricannet_trainval \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 3 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --trainval True
+
+#CUDA_VISIBLE_DEVICES=3 python shells/train.py --model oricannet --save-dir outputs/oricannet_lr1e-4 \
+#                         --batch-size 16 \
+#                         --data-dir /data/deeplearning/crowdcounting/UCF-Train-Val-Test \
+#                         --device 3 \
+#                         --val-epoch 1 \
+#                         --steps 700 \
+#                         --lr 1e-4 \
+#                         --val-start 0
+
+#CUDA_VISIBLE_DEVICES=2 python shells/train.py --model oricannet --save-dir outputs/oricannet_trainval \
+#                         --batch-size 16 \
+#                         --data-dir ${UCF} \
+#                         --device 2 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --trainval True
+
+#CUDA_VISIBLE_DEVICES=1 python shells/train.py --model oricannet --save-dir outputs/oricannet_joint \
+#                         --batch-size 16 \
+#                         --data-dir ${SHTA},${SHTB},${UCF} \
+#                         --device 1 \
+#                         --val-epoch 1 \
+#                         --val-start 0 \
+#                         --use-joint-dataset True
+
+CUDA_VISIBLE_DEVICES=0 python shells/train.py --model sfcn --save-dir outputs/sfcn_trainval \
+                         --batch-size 12 \
+                         --data-dir ${UCF} \
+                         --device 0 \
                          --val-epoch 1 \
                          --val-start 0 \
-                         --downsample-ratio 8 \
-                         --steps 300,600
+                         --trainval True
